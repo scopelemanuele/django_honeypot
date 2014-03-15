@@ -7,14 +7,14 @@ Django-honeypod analyzes all the traffic on the site by checking the reputation 
 INSTALLATION:
 
 
-1) Add Django-HoneyPod to INSTALLED_APPS:
+1) Add Django-HoneyPot to INSTALLED_APPS:
     INSTALLED_APPS = (
         [...],
         'django_honeypot',
         [...]
     )
 
-2) Add Django-HoneyPod middleware to MIDDLEWARE_CLASSES:
+2) Add Django-HoneyPot middleware to MIDDLEWARE_CLASSES:
     MIDDLEWARE_CLASSES = (
         [...]
         'django_honeypot.middleware.HoneypotMiddleware',
