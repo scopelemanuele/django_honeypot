@@ -25,16 +25,16 @@ class HoneypotMiddleware(object):
             ip = request.META.get('REMOTE_ADDR')
         return ip
 
-    def dns_request(self, ip):
+    def dns_request(self, ip, request):
         """
         Perform request to honeypot server and process the response
         """
-        request = settings.HoneyKey + '.' + self.revers_ip(ip) + '.' + settings.DNSUrl
+        req = settings.HoneyKey + '.' + self.revers_ip(ip) + '.' + settings.DNSUrl
         try:
-            res = socket.gethostbyname(request)
+            res = socket.gethostbyname(req)
             response = res.split('.')
             if int(response[0]) == 127 and int(response[3]) >= 1:
-                self.save_log(ip, response)
+                self.save_log(ip, response, request)
                 #Suspicious permitted andThreatRating unset permit visitor
                 if settings.Suspicious and not settings.ThreatRating and int(response[3]) == 1:
                     return None
@@ -59,7 +59,7 @@ class HoneypotMiddleware(object):
         except:
             return None
 
-    def save_log(self, ip, response):
+    def save_log(self, ip, response, request):
         """
         If visitor is scheduled write it into the log
         """
@@ -73,6 +73,8 @@ class HoneypotMiddleware(object):
         log.last_activity = int(response[1])
         log.rating = int(response[2])
         log.type = TYPE[response[3]]
+        log.from_url = request.META.get('HTTP_REFERER')
+        log.request_url = request.get_full_path()
         log.save()
 
     def revers_ip(self, ip):
@@ -83,6 +85,6 @@ class HoneypotMiddleware(object):
         return t[3] + '.' + t[2] + '.' + t[1] + '.' + t[0]
 
     def process_request(self, request):
-        if self.dns_request(self.get_client_ip(request)):
+        if self.dns_request(self.get_client_ip(request), request):
             return HttpResponseRedirect(settings.HoneyPotUrl)
 

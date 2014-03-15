@@ -28,6 +28,8 @@ class HoneypotLog(TimeStampedModel):
     ip = models.IPAddressField()
     last_activity = models.IntegerField(default=255)
     rating = models.IntegerField(default=0)
+    from_url = models.CharField(max_length=1024, default=None, null=True)
+    request_url = models.CharField(max_length=1024, default=None, null=True)
     type = models.CharField(max_length=255)
 
     class Meta:
@@ -37,7 +39,7 @@ class HoneypotLog(TimeStampedModel):
 
 
 class LogOptions(admin.ModelAdmin):
-    list_display = ('ip', 'last_activity', 'rating', 'type', 'created')
+    list_display = ('ip', 'last_activity', 'rating', 'type', 'request_url', 'created')
     list_filter = ['created', 'type']
 
 
