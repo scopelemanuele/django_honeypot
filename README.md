@@ -2,6 +2,7 @@ django-honeypot
 ===============
 
 A simple implementation of Project Honey Pot to reduce spam bot in your site
+Django-honeypod analyzes all the traffic on the site by checking the reputation of the visitor on the website of the project http://www.projecthoneypot.org/home.php.
 
 INSTALLATION:
 
@@ -22,7 +23,7 @@ INSTALLATION:
 
 CONFIGURATION:
 
-The configuration is made to editing settings.py files.
+The configuration is done by editing the file settings.py file.
 
 Option:
 
@@ -33,3 +34,5 @@ Option:
 --Suspicious: if set to True allows traffic from suspicious visitor
 
 --ThreatRating: is the reputation allowed 0 to 255 where 0 is good 255 is bad. None allow all reputation. For more info: http://www.projecthoneypot.org/threat_info.php
+
+Every visitor suspicion is recorded on the database.
