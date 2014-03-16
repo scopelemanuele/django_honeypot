@@ -63,16 +63,21 @@ class HoneypotMiddleware(object):
         """
         If visitor is scheduled write it into the log
         """
+
         TYPE = {
             '0': _('Search Engine'),
             '1': _('Suspicious'),
             '2': _('Harvester'),
             '4': _('Comment Spammer'),
         }
+
         log = HoneypotLog(ip=ip)
         log.last_activity = int(response[1])
         log.rating = int(response[2])
-        log.type = TYPE[response[3]]
+        try:
+            log.type = TYPE[response[3]]
+        except:
+            log.type = TYPE['2']
         log.from_url = request.META.get('HTTP_REFERER')
         log.request_url = request.get_full_path()
         log.save()
@@ -87,4 +92,3 @@ class HoneypotMiddleware(object):
     def process_request(self, request):
         if self.dns_request(self.get_client_ip(request), request):
             return HttpResponseRedirect(settings.HoneyPotUrl)
-
