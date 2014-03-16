@@ -11,6 +11,12 @@ import socket
 from django_honeypot import settings
 from django_honeypot.models import *
 
+# import the logging library
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
+
 
 class HoneypotMiddleware(object):
     """
@@ -30,33 +36,44 @@ class HoneypotMiddleware(object):
         Perform request to honeypot server and process the response
         """
         req = settings.HoneyKey + '.' + self.revers_ip(ip) + '.' + settings.DNSUrl
+        logger.info('***Honeypot: request: %s' % req)
         try:
             res = socket.gethostbyname(req)
             response = res.split('.')
             if int(response[0]) == 127 and int(response[3]) >= 1:
+                logger.info('***Honeypot: Bad visitor! Ip: %s response: %s' % (ip, res))
                 self.save_log(ip, response, request)
                 #Suspicious permitted andThreatRating unset permit visitor
                 if settings.Suspicious and not settings.ThreatRating and int(response[3]) == 1:
+                    logger.info('***Honeypot: Bad visitor allowed')
                     return None
                 #Suspicious permitted and ThreatRating set permit
                 elif settings.Suspicious and settings.ThreatRating and int(response[3]) == 1:
                     #control visitor rating
                     if int(response[2]) > settings.ThreatRating:
+                        logger.info('***Honeypot: Bad visitor denyed')
                         return True
                     else:
+                        logger.info('***Honeypot: Bad visitor allowed')
                         return None
                 elif not settings.Suspicious and not settings.ThreatRating and int(response[3]) > 1:
+                    logger.info('***Honeypot: Bad visitor denyed')
                     return True
                 elif not settings.Suspicious and settings.ThreatRating and int(response[3]) > 1:
                     #control visitor rating
                     if int(response[2]) > settings.ThreatRating:
+                        logger.info('***Honeypot: Bad visitor denyed')
                         return True
                     else:
+                        logger.info('***Honeypot: Bad visitor allowed')
                         return None
+                logger.info('***Honeypot: Bad visitor denyed')
                 return True
             else:
+                logger.info('***Honeypot: Visitor allowed')
                 return None
         except:
+            logger.info('***Honeypot: Visitor not in db allowed!')
             return None
 
     def save_log(self, ip, response, request):
@@ -77,6 +94,7 @@ class HoneypotMiddleware(object):
         try:
             log.type = TYPE[response[3]]
         except:
+            logger.error('***Honeypot: Type wrong!')
             log.type = TYPE['2']
         log.from_url = request.META.get('HTTP_REFERER')
         log.request_url = request.get_full_path()
