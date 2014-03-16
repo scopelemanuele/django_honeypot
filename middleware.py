@@ -36,9 +36,11 @@ class HoneypotMiddleware(object):
         Perform request to honeypot server and process the response
         """
         req = settings.HoneyKey + '.' + self.revers_ip(ip) + '.' + settings.DNSUrl
-        logger.info('***Honeypot: request: %s' % req)
+        logger.info('***Honeypot: request dns: %s' % req)
+        logger.info('***Honeypot: url requested: %s' % request.get_full_path())
         try:
             res = socket.gethostbyname(req)
+            log.info('***Honeypot response: %s' % res)
             response = res.split('.')
             if int(response[0]) == 127 and int(response[3]) >= 1:
                 logger.info('***Honeypot: Bad visitor! Ip: %s response: %s' % (ip, res))
@@ -73,7 +75,7 @@ class HoneypotMiddleware(object):
                 logger.info('***Honeypot: Visitor allowed')
                 return None
         except:
-            logger.info('***Honeypot: Visitor not in db allowed!')
+            logger.info('***Honeypot: Visitor %s not in db allowed!' % ip)
             return None
 
     def save_log(self, ip, response, request):
