@@ -51,23 +51,23 @@ class HoneypotMiddleware(object):
                 elif settings.Suspicious and settings.ThreatRating and int(response[3]) == 1:
                     #control visitor rating
                     if int(response[2]) > settings.ThreatRating:
-                        logger.info('***Honeypot: Bad visitor denyed')
+                        logger.info('***Honeypot: Bad visitor: Blocked')
                         return True
                     else:
                         logger.info('***Honeypot: Bad visitor allowed')
                         return None
                 elif not settings.Suspicious and not settings.ThreatRating and int(response[3]) > 1:
-                    logger.info('***Honeypot: Bad visitor denyed')
+                    logger.info('***Honeypot: Bad visitor: Blocked')
                     return True
                 elif not settings.Suspicious and settings.ThreatRating and int(response[3]) > 1:
                     #control visitor rating
                     if int(response[2]) > settings.ThreatRating:
-                        logger.info('***Honeypot: Bad visitor denyed')
+                        logger.info('***Honeypot: Bad visitor: Blocked')
                         return True
                     else:
                         logger.info('***Honeypot: Bad visitor allowed')
                         return None
-                logger.info('***Honeypot: Bad visitor denyed')
+                logger.info('***Honeypot: Bad visitor: Blocked')
                 return True
             else:
                 logger.info('***Honeypot: Visitor allowed')
