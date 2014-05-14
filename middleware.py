@@ -35,48 +35,50 @@ class HoneypotMiddleware(object):
         """
         Perform request to honeypot server and process the response
         """
+
         req = settings.HoneyKey + '.' + self.revers_ip(ip) + '.' + settings.DNSUrl
         logger.info('***Honeypot: request dns: %s' % req)
         logger.info('***Honeypot: url requested: %s' % request.get_full_path())
         try:
             res = socket.gethostbyname(req)
-            log.info('***Honeypot response: %s' % res)
-            response = res.split('.')
-            if int(response[0]) == 127 and int(response[3]) >= 1:
-                logger.info('***Honeypot: Bad visitor! Ip: %s response: %s' % (ip, res))
-                self.save_log(ip, response, request)
-                #Suspicious permitted andThreatRating unset permit visitor
-                if settings.Suspicious and not settings.ThreatRating and int(response[3]) == 1:
-                    logger.info('***Honeypot: Bad visitor allowed')
-                    return None
-                #Suspicious permitted and ThreatRating set permit
-                elif settings.Suspicious and settings.ThreatRating and int(response[3]) == 1:
-                    #control visitor rating
-                    if int(response[2]) > settings.ThreatRating:
-                        logger.info('***Honeypot: Bad visitor: Blocked')
-                        return True
-                    else:
-                        logger.info('***Honeypot: Bad visitor allowed')
-                        return None
-                elif not settings.Suspicious and not settings.ThreatRating and int(response[3]) > 1:
-                    logger.info('***Honeypot: Bad visitor: Blocked')
-                    return True
-                elif not settings.Suspicious and settings.ThreatRating and int(response[3]) > 1:
-                    #control visitor rating
-                    if int(response[2]) > settings.ThreatRating:
-                        logger.info('***Honeypot: Bad visitor: Blocked')
-                        return True
-                    else:
-                        logger.info('***Honeypot: Bad visitor allowed')
-                        return None
-                logger.info('***Honeypot: Bad visitor: Blocked')
-                return True
-            else:
-                logger.info('***Honeypot: Visitor allowed')
-                return None
+            #log.info('***Honeypot response: %s' % res)
         except:
             logger.info('***Honeypot: Visitor %s not in db allowed!' % ip)
             return None
+        response = res.split('.')
+        if int(response[0]) == 127 and int(response[3]) >= 1:
+            logger.info('***Honeypot: Bad visitor! Ip: %s response: %s' % (ip, res))
+            self.save_log(ip, response, request)
+            #Suspicious permitted andThreatRating unset permit visitor
+            if settings.Suspicious and not settings.ThreatRating and int(response[3]) == 1:
+                logger.info('***Honeypot: Bad visitor allowed')
+                return None
+            #Suspicious permitted and ThreatRating set permit
+            elif settings.Suspicious and settings.ThreatRating and int(response[3]) == 1:
+                #control visitor rating
+                if int(response[2]) > settings.ThreatRating:
+                    logger.info('***Honeypot: Bad visitor: Blocked')
+                    return True
+                else:
+                    logger.info('***Honeypot: Bad visitor allowed')
+                    return None
+            elif not settings.Suspicious and not settings.ThreatRating and int(response[3]) > 1:
+                logger.info('***Honeypot: Bad visitor: Blocked')
+                return True
+            elif not settings.Suspicious and settings.ThreatRating and int(response[3]) > 1:
+                #control visitor rating
+                if int(response[2]) > settings.ThreatRating:
+                    logger.info('***Honeypot: Bad visitor: Blocked')
+                    return True
+                else:
+                    logger.info('***Honeypot: Bad visitor allowed')
+                    return None
+            logger.info('***Honeypot: Bad visitor: Blocked')
+            return True
+        else:
+            logger.info('***Honeypot: Visitor allowed')
+            return None
+        
 
     def save_log(self, ip, response, request):
         """
@@ -88,6 +90,9 @@ class HoneypotMiddleware(object):
             '1': _('Suspicious'),
             '2': _('Harvester'),
             '4': _('Comment Spammer'),
+            '5': _('Suspicious & Comment Spammer'),
+            '6': _('Harvester & Comment Spammer'),
+            '7': _('Suspicious & Harvester & Comment Spammer')
         }
 
         log = HoneypotLog(ip=ip)
